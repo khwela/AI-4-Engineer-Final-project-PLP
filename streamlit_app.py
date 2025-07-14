@@ -19,23 +19,23 @@ This app helps South African citizens:
 # --- Tabs ---
 tabs = st.tabs(["📄 Digital ID Upload", "📅 Book Appointment", "🤖 Chatbot (Mock)", "📊 Admin Dashboard"])
 
-# --- Tab 1: Digital ID Upload ---
+# --- Tab 1: Scan Digital ID ---
 with tabs[0]:
-    st.header("📄 Upload Your Digital ID")
+    st.header("📷 Scan Your ID or Passport")
     name = st.text_input("Full Name")
     id_number = st.text_input("ID Number")
-    uploaded_file = st.file_uploader("Upload your ID or Passport (PDF or Image)", type=["pdf", "png", "jpg", "jpeg"])
+    scanned_image = st.camera_input("Take a picture of your ID or Passport")
 
-    if st.button("Save Document"):
-        if name and id_number and uploaded_file:
-            upload_dir = "uploaded_ids"
-            os.makedirs(upload_dir, exist_ok=True)
-            file_path = os.path.join(upload_dir, uploaded_file.name)
-            with open(file_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            st.success(f"ID for {name} uploaded successfully!")
+    if st.button("Save Scanned ID"):
+        if name and id_number and scanned_image:
+            scan_dir = "scanned_ids"
+            os.makedirs(scan_dir, exist_ok=True)
+            image = Image.open(scanned_image)
+            file_path = os.path.join(scan_dir, f"{id_number}_{name.replace(' ', '_')}.jpg")
+            image.save(file_path)
+            st.success(f"ID for {name} scanned and saved successfully!")
         else:
-            st.warning("Please fill all fields and upload a file.")
+            st.warning("Please fill in your name and ID number, and scan your ID.")
 
 # --- Tab 2: Appointment Booking ---
 with tabs[1]:
