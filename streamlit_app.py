@@ -4,10 +4,17 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
-import openai
+from chatterbot import ChatBot
+from chatterbot.trainers import ChatterBotCorpusTrainer
 
-# Set your OpenAI API key here or use environment variable
-openai.api_key = os.getenv("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")
+# Initialize ChatterBot
+chatbot = ChatBot("HomeAffairsBot")
+trainer = ChatterBotCorpusTrainer(chatbot)
+try:
+    chatbot.storage.drop()
+    trainer.train("chatterbot.corpus.english")
+except:
+    pass
 
 st.set_page_config(page_title="Home Affairs AI Assistant", layout="wide")
 
@@ -60,7 +67,7 @@ with tabs[1]:
         }
         st.success(f"Appointment confirmed for {booking['Service']} on {booking['Date']} at {booking['Time']} in {booking['Branch']}, {booking['Province']}")
 
-# --- Tab 3: Chatbot with OpenAI ---
+# --- Tab 3: Chatbot using ChatterBot ---
 with tabs[2]:
     st.header("🤖 AI Chatbot Assistant")
     st.markdown("Ask any question about Home Affairs services.")
@@ -70,23 +77,18 @@ with tabs[2]:
 
     user_input = st.text_input("You:")
     if user_input:
-        st.session_state.chat_history.append({"role": "user", "content": user_input})
+        st.session_state.chat_history.append(("user", user_input))
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=st.session_state.chat_history
-            )
-            reply = response.choices[0].message.content
-            st.session_state.chat_history.append({"role": "assistant", "content": reply})
+            bot_response = str(chatbot.get_response(user_input))
         except Exception as e:
-            reply = f"Error: {e}"
-            st.session_state.chat_history.append({"role": "assistant", "content": reply})
+            bot_response = f"Error: {e}"
+        st.session_state.chat_history.append(("bot", bot_response))
 
-    for msg in st.session_state.chat_history:
-        if msg["role"] == "user":
-            st.markdown(f"**You:** {msg['content']}")
+    for sender, message in st.session_state.chat_history:
+        if sender == "user":
+            st.markdown(f"**You:** {message}")
         else:
-            st.markdown(f"**Bot:** {msg['content']}")
+            st.markdown(f"**Bot:** {message}")
 
 
 # --- Tab 4: Admin Dashboard ---
