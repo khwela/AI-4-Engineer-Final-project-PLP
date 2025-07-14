@@ -4,6 +4,10 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
+import openai
+
+# Set your OpenAI API key here or use environment variable
+openai.api_key = os.getenv("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")
 
 st.set_page_config(page_title="Home Affairs AI Assistant", layout="wide")
 
@@ -56,14 +60,34 @@ with tabs[1]:
         }
         st.success(f"Appointment confirmed for {booking['Service']} on {booking['Date']} at {booking['Time']} in {booking['Branch']}, {booking['Province']}")
 
-# --- Tab 3: Chatbot Placeholder ---
+# --- Tab 3: Chatbot with OpenAI ---
 with tabs[2]:
     st.header("🤖 AI Chatbot Assistant")
-    st.markdown("_Note: This is a placeholder. Integrate OpenAI or Dialogflow for full functionality._")
-    user_input = st.text_input("Ask me anything about Home Affairs services")
+    st.markdown("Ask any question about Home Affairs services.")
+
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
+    user_input = st.text_input("You:")
     if user_input:
-        st.info(f"You asked: {user_input}")
-        st.success("This is a mock response. You can connect this to a real AI model.")
+        st.session_state.chat_history.append({"role": "user", "content": user_input})
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=st.session_state.chat_history
+            )
+            reply = response.choices[0].message.content
+            st.session_state.chat_history.append({"role": "assistant", "content": reply})
+        except Exception as e:
+            reply = f"Error: {e}"
+            st.session_state.chat_history.append({"role": "assistant", "content": reply})
+
+    for msg in st.session_state.chat_history:
+        if msg["role"] == "user":
+            st.markdown(f"**You:** {msg['content']}")
+        else:
+            st.markdown(f"**Bot:** {msg['content']}")
+
 
 # --- Tab 4: Admin Dashboard ---
 with tabs[3]:
