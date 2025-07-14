@@ -4,19 +4,21 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
-from chatterbot import ChatBot
-from chatterbot.trainers import ChatterBotCorpusTrainer
-
-# Initialize ChatterBot
-chatbot = ChatBot("HomeAffairsBot")
-trainer = ChatterBotCorpusTrainer(chatbot)
-try:
-    chatbot.storage.drop()
-    trainer.train("chatterbot.corpus.english")
-except:
-    pass
 
 st.set_page_config(page_title="Home Affairs AI Assistant", layout="wide")
+
+def home_affairs_bot(user_input):
+    user_input = user_input.lower()
+    if "passport" in user_input:
+        return "You can renew your passport at any Home Affairs branch. Book online!"
+    elif "id" in user_input:
+        return "New IDs require your birth certificate and fingerprints."
+    elif "hours" in user_input or "open" in user_input:
+        return "Most branches are open from 8:00 AM to 3:30 PM on weekdays."
+    else:
+        return "Sorry, I don’t understand that. Please ask about IDs, passports, or bookings."
+
+
 
 # --- App Title ---
 st.title("🇿🇦 Smart Home Affairs AI Assistant")
@@ -70,7 +72,7 @@ with tabs[1]:
 # --- Tab 3: Chatbot using ChatterBot ---
 with tabs[2]:
     st.header("🤖 AI Chatbot Assistant")
-    st.markdown("Ask any question about Home Affairs services.")
+    st.markdown("Ask about Home Affairs services (e.g., ID, passport, booking)")
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
@@ -78,10 +80,7 @@ with tabs[2]:
     user_input = st.text_input("You:")
     if user_input:
         st.session_state.chat_history.append(("user", user_input))
-        try:
-            bot_response = str(chatbot.get_response(user_input))
-        except Exception as e:
-            bot_response = f"Error: {e}"
+        bot_response = home_affairs_bot(user_input)
         st.session_state.chat_history.append(("bot", bot_response))
 
     for sender, message in st.session_state.chat_history:
@@ -89,7 +88,6 @@ with tabs[2]:
             st.markdown(f"**You:** {message}")
         else:
             st.markdown(f"**Bot:** {message}")
-
 
 # --- Tab 4: Admin Dashboard ---
 with tabs[3]:
