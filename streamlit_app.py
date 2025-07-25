@@ -7,9 +7,6 @@ import random
 import datetime 
 
 
-def generate_otp():
-    return random.randint(100000, 999999)
-
 # Initialize session state variables
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
@@ -27,35 +24,6 @@ if not os.path.exists(users_file):
 users_df = pd.read_csv(users_file)
 
 
-# SMTP Email Sending Function
-def send_otp_email(email, otp):
-    sender_email = "your_email@gmail.com"  # Replace with your email
-    sender_password = "your_app_password"  # Replace with your app password
-    smtp_server = "smtp.gmail.com"
-    smtp_port = 587
-
-    # Create the email content
-    subject = "Your OTP Code"
-    body = f"Your OTP code is: {otp}"
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = sender_email
-    msg["To"] = email
-
-    try:
-        # Connect to the SMTP server and send the email
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()  # Upgrade the connection to secure
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, email, msg.as_string())
-        server.quit()
-        st.success("OTP email sent successfully!")
-    except smtplib.SMTPAuthenticationError:
-        st.error("Authentication failed. Please check your email and App Password.")
-    except smtplib.SMTPException as e:
-        st.error(f"Failed to send email: {e}")
-        
-
 # Registration Function
 def register_user():
     global users_df  # Declare users_df as global to modify it
@@ -70,24 +38,11 @@ def register_user():
             st.warning("User already exists. Please log in.")
             return
 
-        # Generate and store OTP in session state
-        otp = generate_otp()
-        st.session_state["otp"] = otp
-        send_otp_email(email, otp)
-        st.success("An OTP has been sent to your email. Please enter it below to complete registration.")
-
-    # OTP Verification
-    if "otp" in st.session_state:
-        entered_otp = st.text_input("Enter the OTP sent to your email", key="register_otp")
-        if st.button("Verify OTP", key="verify_otp_button"):
-            if entered_otp == str(st.session_state["otp"]):  # Compare as string
-                new_user = pd.DataFrame([[email, name, phone, password, True]], columns=users_df.columns)
-                users_df = pd.concat([users_df, new_user], ignore_index=True)
-                users_df.to_csv(users_file, index=False)
-                st.success("Registration complete! You can now log in.")
-                del st.session_state["otp"]  # Clear OTP from session state
-            else:
-                st.error("Invalid OTP. Please try again.")
+        # Add the new user to the DataFrame
+        new_user = pd.DataFrame([[email, name, phone, password, True]], columns=users_df.columns)
+        users_df = pd.concat([users_df, new_user], ignore_index=True)
+        users_df.to_csv(users_file, index=False)
+        st.success("Registration complete! You can now log in.")
 
 # Login Function
 def login_user():
@@ -103,9 +58,7 @@ def login_user():
             st.session_state["user_email"] = email
             st.success("Login successful!")
         else:
-                st.error("Invalid password.")
-    else:
-              st.error("Invalid email.")
+            st.error("Invalid email or password.")
 
 # Main App Function
 def main_app():
