@@ -1,100 +1,124 @@
-# Smart Home Affairs Assistant using Streamlit
-
 import streamlit as st
 import pandas as pd
-from datetime import datetime
 import os
+import smtplib
+from email.mime.text import MIMEText
 
-st.set_page_config(page_title="Home Affairs AI Assistant", layout="wide")
 
-def home_affairs_bot(user_input):
-    user_input = user_input.lower()
-    if "passport" in user_input:
-        return "You can renew your passport at any Home Affairs branch. Book online!"
-    elif "id" in user_input:
-        return "New IDs require your birth certificate and fingerprints."
-    elif "hours" in user_input or "open" in user_input:
-        return "Most branches are open from 8:00 AM to 3:30 PM on weekdays."
+
+
+# Initialize session state variables
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+if "user_email" not in st.session_state:
+    st.session_state["user_email"] = None
+
+# Path to the CSV file storing user data
+users_file = "C:\\2025 COHORT FEB\\AI For Software Engineering\\Final  project\\users.csv"
+
+# Ensure the users file exists
+if not os.path.exists(users_file):
+    pd.DataFrame(columns=["email", "name", "phone", "password", "first_time"]).to_csv(users_file, index=False)
+
+# Load the users DataFrame
+users_df = pd.read_csv(users_file)
+
+
+# SMTP Email Sending Function
+def send_otp_email(email, otp):
+    sender_email = "your_email@gmail.com"  # Replace with your email
+    sender_password = "your_app_password"  # Replace with your app password
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
+
+    # Create the email content
+    subject = "Your OTP Code"
+    body = f"Your OTP code is: {otp}"
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = email
+
+    try:
+        # Connect to the SMTP server and send the email
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()  # Upgrade the connection to secure
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, email, msg.as_string())
+        server.quit()
+        st.success("OTP email sent successfully!")
+    except smtplib.SMTPAuthenticationError:
+        st.error("Authentication failed. Please check your email and App Password.")
+    except smtplib.SMTPException as e:
+        st.error(f"Failed to send email: {e}")
+
+# Registration Function
+def register_user():
+    
+    global users_df  # Declare users_df as global to modify it
+    st.subheader("Register")
+    name = st.text_input("Full Name", key="register_name")
+    email = st.text_input("Email", key="register_email")
+    phone = st.text_input("Phone", key="register_phone")
+    password = st.text_input("Password", type="password", key="register_password")
+
+    if st.button("Register", key="register_button"):
+        if email in users_df["email"].values:
+            st.warning("User already exists. Please log in.")
+            return
+
+        otp = generate_otp()
+        send_otp_email(email, otp)
+        entered_otp = st.text_input("Enter the OTP sent to your email", key="register_otp")
+
+    if st.button("Verify OTP", key="verify_otp_button"):
+        if entered_otp == otp:
+            new_user = pd.DataFrame([[email, name, phone, password, True]], columns=users_df.columns)
+            users_df = pd.concat([users_df, new_user], ignore_index=True)
+            users_df.to_csv(users_file, index=False)
+            st.success("Registration complete! You can now log in.")
+        else:
+            st.error("Invalid OTP")
+
+# Login Function
+def login_user():
+    global users_df  # Declare users_df as global to access it
+    st.subheader("Log In")
+    email = st.text_input("Email", key="login_email")
+    password = st.text_input("Password", type="password", key="login_password")
+
+    if st.button("Login", key="login_button"):
+        user = users_df[users_df["email"] == email]
+        if not user.empty and password == user.iloc[0]["password"]:
+            st.session_state["authenticated"] = True
+            st.session_state["user_email"] = email
+            st.success("Login successful!")
+        else:
+                st.error("Invalid password.")
     else:
-        return "Sorry, I don’t understand that. Please ask about IDs, passports, or bookings."
+              st.error("Invalid email.")
 
+# Main App Function
+def main_app():
+    st.title("Welcome to the Main App!")
+    st.markdown(f"Hello, **{st.session_state['user_email']}**! You are now logged in.")
+    st.button("Log Out", on_click=logout)
 
+# Logout Function
+def logout():
+    st.session_state["authenticated"] = False
+    st.session_state["user_email"] = None
+    st.experimental_rerun()
 
-# --- App Title ---
-st.title("🇿🇦 Smart Home Affairs AI Assistant")
-st.markdown("""
-This app helps South African citizens:
-- Upload and store digital IDs
-- Book appointments
-- Interact with an AI assistant for FAQs
-""")
+# App Flow
+if not st.session_state["authenticated"]:
+    st.title("Home Affairs App")
+    st.markdown("Please register or log in to continue.")
+    tab1, tab2 = st.tabs(["Register", "Log In"])
 
-# --- Tabs ---
-tabs = st.tabs(["📄 Digital ID Upload", "📅 Book Appointment", "🤖 Chatbot (Mock)", "📊 Admin Dashboard"])
-
-# --- Tab 1: Scan Digital ID ---
-with tabs[0]:
-    st.header("📷 Scan Your ID or Passport")
-    name = st.text_input("Full Name")
-    id_number = st.text_input("ID Number")
-    scanned_image = st.camera_input("Take a picture of your ID or Passport")
-
-    if st.button("Save Scanned ID"):
-        if name and id_number and scanned_image:
-            scan_dir = "scanned_ids"
-            os.makedirs(scan_dir, exist_ok=True)
-            image = Image.open(scanned_image)
-            file_path = os.path.join(scan_dir, f"{id_number}_{name.replace(' ', '_')}.jpg")
-            image.save(file_path)
-            st.success(f"ID for {name} scanned and saved successfully!")
-        else:
-            st.warning("Please fill in your name and ID number, and scan your ID.")
-
-# --- Tab 2: Appointment Booking ---
-with tabs[1]:
-    st.header("📅 Book an Appointment")
-    service = st.selectbox("Select a service", ["New ID", "Passport Renewal", "Birth Certificate", "Marriage Certificate"])
-    province = st.selectbox("Select Province", ["Gauteng", "KZN", "Western Cape", "Eastern Cape"])
-    branch = st.selectbox("Select Branch", ["Johannesburg Central", "Durban Office", "Cape Town Civic", "Port Elizabeth"])
-    date = st.date_input("Select Appointment Date")
-    time = st.time_input("Select Appointment Time")
-
-    if st.button("Confirm Booking"):
-        booking = {
-            "Service": service,
-            "Province": province,
-            "Branch": branch,
-            "Date": date.strftime("%Y-%m-%d"),
-            "Time": time.strftime("%H:%M")
-        }
-        st.success(f"Appointment confirmed for {booking['Service']} on {booking['Date']} at {booking['Time']} in {booking['Branch']}, {booking['Province']}")
-
-# --- Tab 3: Chatbot using ChatterBot ---
-with tabs[2]:
-    st.header("🤖 AI Chatbot Assistant")
-    st.markdown("Ask about Home Affairs services (e.g., ID, passport, booking)")
-
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
-
-    user_input = st.text_input("You:")
-    if user_input:
-        st.session_state.chat_history.append(("user", user_input))
-        bot_response = home_affairs_bot(user_input)
-        st.session_state.chat_history.append(("bot", bot_response))
-
-    for sender, message in st.session_state.chat_history:
-        if sender == "user":
-            st.markdown(f"**You:** {message}")
-        else:
-            st.markdown(f"**Bot:** {message}")
-
-# --- Tab 4: Admin Dashboard ---
-with tabs[3]:
-    st.header("📊 Admin Dashboard")
-    st.markdown("_Simulated statistics for demo purposes_")
-    stats = pd.DataFrame({
-        "Service": ["New ID", "Passport Renewal", "Birth Certificate"],
-        "Bookings": [120, 85, 45]
-    })
-    st.bar_chart(stats.set_index("Service"))
+    with tab1:
+        register_user()
+    with tab2:
+        login_user()
+else:
+    main_app()
