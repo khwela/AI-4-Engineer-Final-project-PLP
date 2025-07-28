@@ -24,17 +24,17 @@ Register page : https://chatbot-zs0khnt6q9m.streamlit.app/
 -Appointments include selecting a province, branch, date, and time.
 
 
-Document Upload:
+3. Document Upload:
 -Users can upload supporting documents (e.g., PDFs, images, Word files).
 -Uploaded files are stored locally in the uploaded_documents directory.
 
 
-AI Chatbot:
+4. AI Chatbot:
 -Users can interact with a chatbot powered by OpenAI's GPT-3.5 model.
 -The chatbot answers questions about Home Affairs services, such as passport renewal, ID requirements, and branch hours.
 
 
-Admin Dashboard:
+5. Admin Dashboard:
 -Displays simulated statistics for services like New ID, Passport Renewal, and Birth Certificate bookings.
 Includes a bar chart visualization.
 
