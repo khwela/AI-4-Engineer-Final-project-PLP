@@ -2,7 +2,7 @@
 
 
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)]([https://streamlit_app.py.streamlit.app/](https://ai-4-engineer-final-project-plp-noq4ehjgnkkjd66aahdbaf.streamlit.app/))
+https://chatbot-zs0khnt6q9m.streamlit.app/
 
 ### How to run it on your own machine
 
