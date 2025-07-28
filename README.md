@@ -80,4 +80,5 @@ Includes a bar chart visualization.
 2. Run the app
    
    $ streamlit run streamlit_app.py
+   $ streamlit run main_app.py
    
