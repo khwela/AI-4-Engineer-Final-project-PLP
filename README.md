@@ -9,29 +9,33 @@ Register page : https://chatbot-zs0khnt6q9m.streamlit.app/
 
 ###Features
 
- Digital ID Upload:
 
-Users can scan and upload their ID or passport using their device's camera.
-Uploaded files are stored locally in the scanned_ids directory.
-Appointment Booking:
+1. Digital ID Upload:
+-Users can scan and upload their ID or passport using their device's camera.
+-Uploaded files are stored locally in the scanned_ids directory.
 
-Users can book appointments for services such as:
-New ID
-Passport Renewal
-Birth Certificate
-Marriage Certificate
-Appointments include selecting a province, branch, date, and time.
+
+2. Appointment Booking:
+-Users can book appointments for services such as:
+-New ID
+-Passport Renewal
+-Birth Certificate
+-Marriage Certificate
+-Appointments include selecting a province, branch, date, and time.
+
+
 Document Upload:
+-Users can upload supporting documents (e.g., PDFs, images, Word files).
+-Uploaded files are stored locally in the uploaded_documents directory.
 
-Users can upload supporting documents (e.g., PDFs, images, Word files).
-Uploaded files are stored locally in the uploaded_documents directory.
+
 AI Chatbot:
+-Users can interact with a chatbot powered by OpenAI's GPT-3.5 model.
+-The chatbot answers questions about Home Affairs services, such as passport renewal, ID requirements, and branch hours.
 
-Users can interact with a chatbot powered by OpenAI's GPT-3.5 model.
-The chatbot answers questions about Home Affairs services, such as passport renewal, ID requirements, and branch hours.
+
 Admin Dashboard:
-
-Displays simulated statistics for services like New ID, Passport Renewal, and Birth Certificate bookings.
+-Displays simulated statistics for services like New ID, Passport Renewal, and Birth Certificate bookings.
 Includes a bar chart visualization.
 
 ### How to run it on your own machine
