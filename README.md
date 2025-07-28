@@ -7,7 +7,7 @@ Main App: https://ai-4-engineer-final-project-plp-weotef4tgvcuhaxptmql7u.streaml
 Register page : https://chatbot-zs0khnt6q9m.streamlit.app/
 
 
-###Features
+# Features
 
 
 1. Digital ID Upload:
@@ -37,6 +37,38 @@ AI Chatbot:
 Admin Dashboard:
 -Displays simulated statistics for services like New ID, Passport Renewal, and Birth Certificate bookings.
 Includes a bar chart visualization.
+
+
+
+### How It Works
+1. **Session Management**:
+   - The app uses Streamlit's session state to manage user authentication and chatbot history.
+
+2. **File Handling**:
+   - Uploaded files are saved locally in predefined directories (`scanned_ids` and uploaded_documents).
+
+3. **Chatbot Integration**:
+   - The chatbot uses OpenAI's API to process user queries and provide relevant responses.
+
+4. **Data Storage**:
+   - User data (e.g., email, name, phone, password) is stored in a CSV file (`users.csv`).
+
+---
+
+
+
+### Requirements
+- Python 3.8 or higher
+- Libraries:
+  - `streamlit`
+  - `pandas`
+  - `openai`
+  - `python-dotenv`
+  - `Pillow`
+
+
+
+
 
 ### How to run it on your own machine
 
